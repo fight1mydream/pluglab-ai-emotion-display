@@ -1,0 +1,4 @@
+.header-actions{display:flex;align-items:center;gap:24px}
+.back-link{color:#fff;text-decoration:none;border:1px solid #60718a;padding:10px 14px;font-size:.8rem;font-weight:800;transition:.2s}
+.back-link:hover{background:var(--blue);border-color:var(--blue);color:var(--ink)}
+@media(max-width:620px){.header-actions{gap:0}.lab-name{display:none}.back-link{padding:9px 10px;font-size:0}.back-link:after{content:"← Learning Lab";font-size:.75rem}}
