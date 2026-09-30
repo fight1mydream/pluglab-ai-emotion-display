@@ -1,0 +1,35 @@
+name: Compile Uno R3 firmware
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'arduino/pluglab_emotion_max7219.ino'
+      - '.github/workflows/compile-uno.yml'
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: '1.3.1'
+      - name: Install Uno core and LED library
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr@1.8.6
+          arduino-cli lib install 'LedControl@1.0.6'
+      - name: Compile unchanged original sketch
+        run: |
+          mkdir -p "$RUNNER_TEMP/pluglab_emotion_max7219"
+          cp arduino/pluglab_emotion_max7219.ino "$RUNNER_TEMP/pluglab_emotion_max7219/"
+          arduino-cli compile --fqbn arduino:avr:uno --output-dir "$RUNNER_TEMP/firmware" "$RUNNER_TEMP/pluglab_emotion_max7219"
+          mkdir -p firmware-output
+          cp "$RUNNER_TEMP/firmware/pluglab_emotion_max7219.ino.hex" firmware-output/pluglab_emotion_max7219.hex
+          sha256sum firmware-output/pluglab_emotion_max7219.hex > firmware-output/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: uno-r3-max7219-firmware
+          path: firmware-output/
+          if-no-files-found: error

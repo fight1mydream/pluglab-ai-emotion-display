@@ -1,0 +1,41 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Arduino 웹 업로드 안내</title><style>body{max-width:850px;margin:40px auto;padding:24px;font-family:system-ui,sans-serif;line-height:1.8;color:#19314a;background:#f6f9fc}h1{font-size:28px}h2{margin-top:36px;font-size:21px}a{color:#0864a0}p{overflow-wrap:anywhere}</style><a href="index-upload.html">← 업로드 페이지로</a><h1>웹 업로드 추가본 사용 안내</h1><p>원본 index.html, app.js, style.css, navigation.css, README.md, CLASS_CHECKLIST.md,<br>arduino/pluglab_emotion_max7219.ino는 바이트 단위로 그대로 보존했습니다.<br>새 페이지: index-upload.html (기존 버튼 제어, AI 카메라 인식 + USB 업로드).<br>원본 페이지는 index.html로 계속 사용할 수 있습니다.</p><h2>1. GitHub에 추가할 파일
+기존 사이트와 같은 폴더에 index-upload.html, upload-guide.html을 추가합니다.
+저장소 최상위에 .github/workflows/compile-uno.yml도 추가합니다.
+숨김 폴더가 보이지 않거나 웹 드래그 업로드가 되지 않으면 GitHub의 Add file →
+Create new file에서 파일명을 .github/workflows/compile-uno.yml로 입력하고,
+ZIP 안의 해당 파일 내용을 붙여넣어 저장하세요.
+기존 파일을 덮어쓸 필요는 없습니다.</h2><h2>2. 선생님이 한 번 준비할 작업: IDE 없이 HEX 만들기
+이 ZIP에는 실제 컴파일된 HEX가 포함되어 있지 않습니다.
+GitHub 저장소 → Actions → Compile Uno R3 firmware → Run workflow를 실행합니다.
+처음이라 Actions가 비활성화되어 있으면 먼저 활성화합니다.
+완료 표시가 나오면 실행 내역의 Artifacts에서 uno-r3-max7219-firmware를 내려받고 압축을 풉니다.
+그 안의 pluglab_emotion_max7219.hex를 저장소의 arduino 폴더에 업로드합니다.
+GitHub Pages 배포가 완료된 뒤 새 페이지에서 수업용 펌웨어를 불러올 수 있습니다.
+또는 HEX를 저장소에 넣지 않고 새 페이지의 &#x27;다른 HEX 선택&#x27;으로 직접 선택해도 됩니다.
+SHA256SUMS.txt는 다운로드 파일 확인용이며 페이지에 올릴 필요는 없습니다.
+원본 스케치를 수정했다면 다시 컴파일하고 새 HEX를 올려야 합니다.
+브라우저가 .ino를 직접 컴파일하는 기능은 아닙니다. GitHub 서버에서 컴파일합니다.</h2><h2>3. 학생 사용 순서
+기존 사이트 주소 뒤에 index-upload.html을 붙여 접속합니다.
+예: https://GitHub아이디.github.io/저장소이름/index-upload.html
+PC Chrome 또는 Edge에서 Arduino Uno R3를 데이터 USB 케이블로 연결합니다.
+수업용 펌웨어 불러오기 → Uno R3에 업로드 → Arduino 포트 선택.
+페이지는 프로그램을 기록한 뒤 전체 데이터를 읽어서 비교합니다.
+완료하면 9600 baud 제어 연결로 자동 전환합니다. 이후 표정 버튼이나 카메라 인식을 사용합니다.
+업로드 전에 인식 중이었다면 업로드 후 &#x27;인식 시작&#x27;을 다시 누르세요.</h2><h2>지원 범위와 오류 해결
+ATmega328P + Optiboot가 있는 Uno R3 전용입니다. Uno R4, Mega, ESP32,
+구형 Nano(57600 baud 부트로더)는 지원하지 않습니다.
+모바일 브라우저를 수업용 업로드 환경으로 사용하지 마세요.
+HTTPS 또는 localhost로 접속해야 합니다. HTML 파일 더블클릭 실행은 권장하지 않습니다.
+업로드하면 보드의 기존 프로그램을 교체합니다. with_bootloader.hex는 선택하지 마세요.
+USB 포트가 보이지 않으면 데이터 케이블과 OS 드라이버를 확인합니다.
+CH340 등 호환 보드는 PC 환경에 따라 드라이버 설치가 필요할 수 있습니다.
+연결 오류가 나면 Arduino IDE 시리얼 모니터, 다른 탭 등 포트를 사용하는 창을 닫습니다.
+업로드 중에는 USB 케이블을 빼지 마세요. 실패 시 보드는 다시 업로드해야 할 수 있습니다.
+자동 재연결에 실패하면 페이지의 USB 연결 버튼으로 다시 연결합니다.</h2><h2>검증 범위
+원본 보존, HEX 파서, 업로드 명령과 읽기 검증은 자동 검사했습니다.
+실제 Uno R3의 USB 업로드 및 GitHub 컴파일 실행은 이 환경에서 검증하지 못했습니다.
+수업 전 실제 보드 한 대로 업로드 → 버튼 표정 → 카메라 인식 순서로 확인하세요.</h2><h2>구현 참고
+Arduino Optiboot: https://github.com/arduino/ArduinoCore-avr/blob/master/bootloaders/optiboot/optiboot.c
+Web Serial: https://developer.chrome.com/docs/capabilities/serial
+Arduino CLI: https://arduino.github.io/arduino-cli/latest/commands/arduino-cli_compile/
+</h2></html>

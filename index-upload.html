@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="버튼 또는 AI 카메라 인식으로 Arduino MAX7219 표정을 제어하는 PLUGLAB Learning Lab"><meta name="robots" content="noindex,nofollow"><title>AI Emotion Display + USB Upload | PLUGLAB Learning Lab</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23071329'/%3E%3Cpath d='M16 8v16M8 16h16' stroke='%2357dbff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="navigation.css"><style>.upload-panel>div{width:100%;min-width:0}.upload-panel p{font-size:.86rem;line-height:1.65;overflow-wrap:anywhere}.upload-panel .button-row{width:100%;align-items:center;margin:16px 0}.upload-panel input{display:block;width:100%;max-width:100%;margin-top:8px}.upload-panel label{font-size:.85rem}.upload-panel details{margin-top:14px}.upload-panel a{color:#175b85}@media(max-width:520px){.upload-panel .button-row{grid-template-columns:1fr}}</style></head>
+<body><header><a class="brand" href="./"><span>+</span> PLUGLAB</a><div class="header-actions"><div class="lab-name">LEARNING LAB / ARDUINO 01</div><a class="back-link" href="./">수업용 앱 처음으로</a></div></header>
+<main><section class="intro"><div class="kicker">AI · FACE LANDMARK · PHYSICAL COMPUTING</div><h1>AI Emotion<br><i>Display</i></h1><p>버튼으로 표정을 직접 선택하거나 카메라에서 얼굴 특징을 인식해 Arduino MAX7219에 표시합니다.</p><div class="notice">교육용 체험 도구입니다. 사람의 실제 감정이나 건강 상태를 판단하지 않습니다.</div></section>
+<nav class="mode-tabs" aria-label="MAX7219 제어 방식"><button class="mode-tab active" id="manualTab" aria-selected="true" aria-controls="manualPanel"><span>01</span> 버튼으로 표정 선택</button><button class="mode-tab" id="cameraTab" aria-selected="false" aria-controls="cameraPanel"><span>02</span> 카메라 AI 인식</button></nav>
+<section class="mode-panel active" id="manualPanel"><div class="manual-stage"><div class="matrix-preview" id="matrixPreview" aria-label="선택한 LED 표정 미리보기"><div class="pixel-face">😊</div><small>MAX7219 PREVIEW</small><strong id="manualEmotionName">웃음</strong></div><div class="manual-copy"><span class="eyebrow">DIRECT CONTROL</span><h2>표정 버튼을 눌러<br>LED에 바로 표시하세요.</h2><p>먼저 Arduino를 USB로 연결한 뒤 원하는 표정을 선택합니다.</p><div class="emotion-buttons"><button data-emotion="SMILE"><span>😊</span><b>웃음</b><small>SMILE</small></button><button data-emotion="SLEEPY"><span>😴</span><b>졸림</b><small>SLEEPY</small></button><button data-emotion="SURPRISE"><span>😮</span><b>놀람</b><small>SURPRISE</small></button><button data-emotion="NEUTRAL"><span>●</span><b>중립</b><small>NEUTRAL</small></button></div></div></div></section>
+<section class="mode-panel" id="cameraPanel" hidden><div class="workspace"><div class="stage"><video id="video" playsinline muted></video><canvas id="overlay"></canvas><div class="empty" id="empty"><b>CAMERA OFF</b><span>‘카메라 시작’을 눌러주세요.</span></div><div class="emotion-badge neutral" id="emotionBadge"><span id="emotionEmoji">●</span><div><small>현재 분류</small><strong id="emotionName">대기 중</strong></div></div></div><aside class="controls"><div class="step"><div class="step-title"><span>01</span><div><b>카메라 설정</b><small id="modelStatus">AI 모델 준비 중...</small></div></div><button class="primary" id="cameraBtn">카메라 시작</button></div><div class="step"><div class="step-title"><span>02</span><div><b>인식 제어</b><small>카메라와 AI 모델이 준비되면 시작할 수 있습니다.</small></div></div><div class="button-row"><button class="primary" id="startBtn" disabled>인식 시작</button><button id="stopBtn" disabled>중지</button></div></div><div class="serial-monitor"><small>ARDUINO 전송값</small><code id="serialData">WAITING...</code></div></aside></div><section class="meters"><article><div><b>웃음</b><span id="smileValue">0%</span></div><progress id="smileMeter" max="1" value="0"></progress></article><article><div><b>눈 감김</b><span id="blinkValue">0%</span></div><progress id="blinkMeter" max="1" value="0"></progress></article><article><div><b>입 벌림</b><span id="jawValue">0%</span></div><progress id="jawMeter" max="1" value="0"></progress></article><article><div><b>눈썹 들림</b><span id="browValue">0%</span></div><progress id="browMeter" max="1" value="0"></progress></article></section></section>
+<section class="connection-bar upload-panel" aria-labelledby="uploadTitle"><div><b id="uploadTitle">Arduino Uno R3 · 웹 업로드</b><p>MAX7219: DIN 7 · CLK 5 · CS 6 / ATmega328P 전용</p><p>처음 사용한다면 <a href="upload-guide.html">업로드 준비 안내</a>를 확인하세요. 업로드하면 보드의 기존 프로그램이 교체됩니다.</p><div class="button-row"><button id="loadFirmwareBtn">수업용 펌웨어 불러오기</button><label>다른 HEX 선택 <input id="hexFile" type="file" accept=".hex"></label></div><p id="firmwareStatus" role="status">수업용 펌웨어 확인 중…</p><button class="primary" id="uploadBtn" disabled>Uno R3에 업로드</button><progress id="uploadProgress" max="100" value="0" style="width:100%;margin-top:16px" aria-label="업로드 진행률"></progress><p id="uploadStatus" role="status" aria-live="polite">PC의 Chrome/Edge에서 HTTPS로 접속하세요.</p><details><summary>업로드 기록</summary><pre id="uploadLog" style="white-space:pre-wrap;max-height:180px;overflow:auto"></pre></details></div></section><section class="connection-bar"><div><b>Arduino USB 연결</b><small id="serialStatus">연결되지 않음 · 9600 baud</small></div><div class="button-row"><button id="connectBtn">USB 연결</button><button id="disconnectBtn" disabled>연결 해제</button></div></section>
+<section class="guide"><div><span>1</span><b>Arduino 업로드</b><p>위의 웹 업로드에서 펌웨어를 불러온 뒤 Uno R3에 업로드합니다.</p></div><div><span>2</span><b>USB 연결</b><p>Chrome 또는 Edge에서 Arduino 포트를 선택합니다.</p></div><div><span>3</span><b>제어 방식 선택</b><p>버튼 제어 또는 카메라 AI 인식을 선택합니다.</p></div></section></main>
+<footer>PLUGLAB · AI × CODING × MAKER EDUCATION</footer><script type="module">
+const $=s=>document.querySelector(s);
+const e={video:$("#video"),canvas:$("#overlay"),empty:$("#empty"),cameraBtn:$("#cameraBtn"),connectBtn:$("#connectBtn"),disconnectBtn:$("#disconnectBtn"),startBtn:$("#startBtn"),stopBtn:$("#stopBtn"),modelStatus:$("#modelStatus"),serialStatus:$("#serialStatus"),serialData:$("#serialData"),badge:$("#emotionBadge"),emoji:$("#emotionEmoji"),name:$("#emotionName"),smileMeter:$("#smileMeter"),blinkMeter:$("#blinkMeter"),jawMeter:$("#jawMeter"),browMeter:$("#browMeter"),smileValue:$("#smileValue"),blinkValue:$("#blinkValue"),jawValue:$("#jawValue"),browValue:$("#browValue"),manualTab:$("#manualTab"),cameraTab:$("#cameraTab"),manualPanel:$("#manualPanel"),cameraPanel:$("#cameraPanel"),manualEmotionName:$("#manualEmotionName"),matrixPreview:$("#matrixPreview")};
+let FaceLandmarker,DrawingUtils,landmarker,stream,serialPort,writer,recognizing=false,modelReady=false,cameraReady=false,lastVideoTime=-1,lastSent="",candidate="NEUTRAL",candidateSince=0;
+const labels={SMILE:["웃음","😊","smile"],SLEEPY:["졸림","😴","sleepy"],SURPRISE:["놀람","😮","surprise"],NEUTRAL:["중립","●","neutral"]};
+
+function updateRecognitionState(){e.startBtn.disabled=uploading||!(modelReady&&cameraReady)}
+async function setupAI(){try{const visionModule=await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");FaceLandmarker=visionModule.FaceLandmarker;DrawingUtils=visionModule.DrawingUtils;const vision=await visionModule.FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");landmarker=await FaceLandmarker.createFromOptions(vision,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",delegate:"GPU"},runningMode:"VIDEO",numFaces:1,outputFaceBlendshapes:true,minFaceDetectionConfidence:.55,minFacePresenceConfidence:.55,minTrackingConfidence:.55});modelReady=true;e.modelStatus.textContent=cameraReady?"카메라·AI 모델 준비 완료":"AI 모델 준비 완료 · 카메라를 시작하세요";updateRecognitionState()}catch(err){e.modelStatus.textContent="AI 모델 로딩 실패 · 인터넷 연결을 확인하세요";console.error(err)}}
+async function startCamera(){if(!navigator.mediaDevices?.getUserMedia){e.modelStatus.textContent="HTTPS의 Chrome 또는 Edge에서 열어주세요";return}try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:1280},height:{ideal:720}},audio:false});e.video.srcObject=stream;await e.video.play();cameraReady=true;e.empty.style.display="none";e.cameraBtn.textContent="카메라 켜짐";e.cameraBtn.disabled=true;e.modelStatus.textContent=modelReady?"카메라·AI 모델 준비 완료":"카메라 켜짐 · AI 모델 준비 중...";updateRecognitionState()}catch(err){e.modelStatus.textContent=err.name==="NotAllowedError"?"카메라 권한이 차단되었습니다":"카메라를 시작하지 못했습니다";console.error(err)}}
+async function connectSerial(){if(!("serial" in navigator)){e.serialStatus.textContent="Chrome 또는 Edge에서 HTTPS로 열어주세요";return}try{serialPort=await navigator.serial.requestPort();await serialPort.open({baudRate:9600});writer=serialPort.writable.getWriter();e.serialStatus.textContent="Arduino 연결됨 · 9600 baud";e.connectBtn.disabled=true;e.disconnectBtn.disabled=false}catch(err){if(err.name!=="NotFoundError")e.serialStatus.textContent="연결 실패: "+err.message}}
+async function disconnectSerial(){try{await pendingWrite.catch(()=>{});if(writer){writer.releaseLock();writer=null}if(serialPort){await serialPort.close();serialPort=null}e.serialStatus.textContent="연결되지 않음 · 9600 baud";e.connectBtn.disabled=false;e.disconnectBtn.disabled=true}catch(err){console.error(err)}}
+const score=(map,name)=>map.get(name)||0;
+function meter(key,value){e[key+"Meter"].value=value;e[key+"Value"].textContent=Math.round(value*100)+"%"}
+function classify(map){const smile=(score(map,"mouthSmileLeft")+score(map,"mouthSmileRight"))/2,blink=(score(map,"eyeBlinkLeft")+score(map,"eyeBlinkRight"))/2,jaw=score(map,"jawOpen"),brow=score(map,"browInnerUp");meter("smile",smile);meter("blink",blink);meter("jaw",jaw);meter("brow",brow);let next="NEUTRAL";if(jaw>.48&&brow>.18)next="SURPRISE";else if(blink>.58)next="SLEEPY";else if(smile>.38)next="SMILE";const now=performance.now();if(next!==candidate){candidate=next;candidateSince=now}return now-candidateSince>450?next:lastSent||"NEUTRAL"}
+async function sendEmotion(emotion,force=false){if(uploading)return;if(emotion===lastSent&&!force)return;lastSent=emotion;const [name,emoji,css]=labels[emotion];e.name.textContent=name;e.emoji.textContent=emoji;e.badge.className="emotion-badge "+css;e.serialData.textContent=emotion+" ↵";if(writer){try{pendingWrite=writer.write(new TextEncoder().encode(emotion+"\n"));await pendingWrite}catch(err){e.serialStatus.textContent="전송 오류 · 연결을 확인하세요"}}else{e.serialStatus.textContent="표정 선택됨 · 먼저 USB를 연결하세요"}}
+function draw(result){e.canvas.width=e.video.videoWidth;e.canvas.height=e.video.videoHeight;const ctx=e.canvas.getContext("2d");ctx.clearRect(0,0,e.canvas.width,e.canvas.height);if(result.faceLandmarks?.[0]){const drawing=new DrawingUtils(ctx);drawing.drawConnectors(result.faceLandmarks[0],FaceLandmarker.FACE_LANDMARKS_FACE_OVAL,{color:"#58ddff",lineWidth:2});drawing.drawConnectors(result.faceLandmarks[0],FaceLandmarker.FACE_LANDMARKS_LIPS,{color:"#ff6b5d",lineWidth:2})}}
+async function loop(){if(!recognizing)return;if(e.video.currentTime!==lastVideoTime&&e.video.readyState>=2){lastVideoTime=e.video.currentTime;const result=landmarker.detectForVideo(e.video,performance.now());draw(result);if(result.faceBlendshapes?.[0]){const map=new Map(result.faceBlendshapes[0].categories.map(c=>[c.categoryName,c.score]));await sendEmotion(classify(map))}}requestAnimationFrame(loop)}
+function startRecognition(){if(!modelReady||!cameraReady)return;recognizing=true;e.startBtn.disabled=true;e.stopBtn.disabled=false;loop()}
+function stopRecognition(){recognizing=false;updateRecognitionState();e.stopBtn.disabled=true;e.canvas.getContext("2d").clearRect(0,0,e.canvas.width,e.canvas.height)}
+function setMode(mode){const manual=mode==="manual";e.manualTab.classList.toggle("active",manual);e.cameraTab.classList.toggle("active",!manual);e.manualTab.setAttribute("aria-selected",manual);e.cameraTab.setAttribute("aria-selected",!manual);e.manualPanel.classList.toggle("active",manual);e.cameraPanel.classList.toggle("active",!manual);e.manualPanel.hidden=!manual;e.cameraPanel.hidden=manual;if(manual&&recognizing)stopRecognition()}
+function selectManualEmotion(emotion,button){document.querySelectorAll("[data-emotion]").forEach(b=>b.classList.remove("selected"));button.classList.add("selected");const [name,emoji]=labels[emotion];e.manualEmotionName.textContent=name;e.matrixPreview.querySelector(".pixel-face").textContent=emoji;sendEmotion(emotion,true)}
+
+e.manualTab.addEventListener("click",()=>setMode("manual"));e.cameraTab.addEventListener("click",()=>setMode("camera"));document.querySelectorAll("[data-emotion]").forEach(button=>button.addEventListener("click",()=>selectManualEmotion(button.dataset.emotion,button)));e.cameraBtn.addEventListener("click",startCamera);e.connectBtn.addEventListener("click",connectSerial);e.disconnectBtn.addEventListener("click",disconnectSerial);e.startBtn.addEventListener("click",startRecognition);e.stopBtn.addEventListener("click",stopRecognition);window.addEventListener("beforeunload",()=>stream?.getTracks().forEach(t=>t.stop()));setupAI();
+
+// Added uploader. Original app.js and index.html are unchanged.
+let uploading=false,firmware=null,firmwareRequest=0,pendingWrite=Promise.resolve();
+const u={button:$('#uploadBtn'),load:$('#loadFirmwareBtn'),file:$('#hexFile'),firmware:$('#firmwareStatus'),status:$('#uploadStatus'),progress:$('#uploadProgress'),log:$('#uploadLog')};
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function parseHex(text){
+  const bytes=new Map();let base=0,eof=false;
+  for(const [i,raw] of text.trim().split(/\r?\n/).entries()){
+    const line=raw.trim();if(!line)continue;
+    if(eof)throw Error('HEX 종료 뒤에 데이터가 있습니다.');
+    if(!/^:[0-9a-f]+$/i.test(line)||(line.length-1)%2)throw Error(`HEX ${i+1}행 형식 오류`);
+    const record=Uint8Array.from(line.slice(1).match(/../g),h=>parseInt(h,16));
+    const n=record[0],address=(record[1]<<8)|record[2],type=record[3];
+    if(record.length!==n+5||record.reduce((a,b)=>a+b,0)%256)throw Error(`HEX ${i+1}행 체크섬 오류`);
+    const data=record.slice(4,4+n);
+    if(type===0){for(let j=0;j<n;j++){const addr=base+address+j;if(addr>=32256)throw Error('Uno R3 프로그램 영역을 초과합니다. with_bootloader.hex는 사용할 수 없습니다.');if(bytes.has(addr))throw Error('HEX 주소가 중복됩니다.');bytes.set(addr,data[j]);}}
+    else if(type===1){if(n!==0||address!==0)throw Error('HEX 종료 레코드 오류');eof=true;}
+    else if(type===2||type===4){if(n!==2||address!==0)throw Error('HEX 확장 주소 오류');base=((data[0]<<8)|data[1])*(type===2?16:65536);}
+    else if(type===3||type===5){if(n!==4||address!==0)throw Error('HEX 시작 주소 오류');}
+    else throw Error('지원하지 않는 HEX 레코드입니다.');
+  }
+  if(!eof||!bytes.size||![0,1,2,3].every(a=>bytes.has(a)))throw Error('유효한 Uno R3 프로그램 HEX가 아닙니다.');
+  const size=Math.max(...bytes.keys())+1,image=new Uint8Array(Math.ceil(size/128)*128);image.fill(255);
+  for(const [addr,value] of bytes)image[addr]=value;
+  return {image,size};
+}
+class Bootloader{
+  constructor(port){this.port=port;this.queue=[];this.error=null;}
+  async open(){await this.port.open({baudRate:115200});this.writer=this.port.writable.getWriter();this.reader=this.port.readable.getReader();this.pump=(async()=>{try{while(true){const {value,done}=await this.reader.read();if(done)break;this.queue.push(...value);}}catch(err){this.error=err;}})();}
+  async read(n,timeout=1800){const end=Date.now()+timeout;while(this.queue.length<n){if(this.error)throw this.error;if(Date.now()>end)throw Error('보드 응답 시간 초과 · Uno R3와 USB 케이블을 확인하세요.');await pause(5);}return Uint8Array.from(this.queue.splice(0,n));}
+  async command(data,n=0){await this.writer.write(Uint8Array.from([...data,0x20]));const response=await this.read(n+2);if(response[0]!==0x14||response[n+1]!==0x10)throw Error('부트로더 응답 오류');return response.slice(1,n+1);}
+  async sync(){
+    for(let attempt=0;attempt<3;attempt++){
+      await this.port.setSignals({dataTerminalReady:false,requestToSend:false});await pause(60);
+      await this.port.setSignals({dataTerminalReady:true,requestToSend:true});await pause(100);this.queue=[];
+      for(let retry=0;retry<6;retry++){
+        await this.writer.write(Uint8Array.of(0x30,0x20));const end=Date.now()+180;
+        while(Date.now()<end){if(this.error)throw this.error;for(let i=0;i<this.queue.length-1;i++){if(this.queue[i]===0x14&&this.queue[i+1]===0x10){this.queue.splice(0,i+2);return;}}await pause(5);}
+      }
+    }
+    throw Error('Uno R3 부트로더와 연결되지 않습니다. 다른 보드나 구형 Nano는 지원하지 않습니다.');
+  }
+  async flash(image,onProgress){
+    await this.sync();const signature=await this.command([0x75],3);
+    if(signature.join(',')!=='30,149,15')throw Error('ATmega328P가 아닙니다. 업로드를 중단했습니다.');
+    await this.command([0x50]);
+    for(let address=0;address<image.length;address+=128){
+      const page=image.slice(address,address+128),word=address/2;
+      await this.command([0x55,word&255,word>>8]);
+      await this.command([0x64,0,128,0x46,...page]);
+      await this.command([0x55,word&255,word>>8]);
+      const check=await this.command([0x74,0,128,0x46],128);
+      if(check.some((b,i)=>b!==page[i]))throw Error(`읽기 검증 실패: ${address}번 주소`);
+      onProgress(Math.round((address+128)/image.length*100));
+    }
+    await this.command([0x51]);
+  }
+  async close(){if(this.reader){try{await this.reader.cancel();}catch{}await this.pump;this.reader.releaseLock();}if(this.writer)this.writer.releaseLock();if(this.port.readable||this.port.writable)await this.port.close();}
+}
+function uploadMessage(message){u.status.textContent=message;u.log.textContent+=message+'\n';}
+async function loadFirmware(){const request=++firmwareRequest;firmware=null;u.button.disabled=true;u.firmware.textContent='수업용 펌웨어 확인 중…';try{const response=await fetch('arduino/pluglab_emotion_max7219.hex',{cache:'no-store'});if(!response.ok)throw Error('아직 HEX가 없습니다. 안내에 따라 GitHub에서 컴파일을 실행하거나 HEX 파일을 선택하세요.');const parsed=parseHex(await response.text());if(request!==firmwareRequest)return;firmware=parsed;u.file.value='';u.firmware.textContent=`수업용 MAX7219 펌웨어 준비 완료 · ${firmware.size} bytes`;u.button.disabled=uploading||!('serial' in navigator)||!isSecureContext;}catch(err){if(request!==firmwareRequest)return;u.firmware.textContent=err.message;}}
+u.load.addEventListener('click',loadFirmware);
+u.file.addEventListener('change',async()=>{const file=u.file.files[0],request=++firmwareRequest;firmware=null;u.button.disabled=true;if(!file)return;try{if(file.size>200000)throw Error('Uno R3용 HEX보다 파일이 큽니다.');const parsed=parseHex(await file.text());if(request!==firmwareRequest)return;firmware=parsed;u.firmware.textContent=`${file.name} · ${firmware.size} bytes / Uno R3용으로 컴파일한 HEX만 선택하세요.`;u.button.disabled=uploading||!('serial' in navigator)||!isSecureContext;}catch(err){if(request===firmwareRequest)u.firmware.textContent=err.message;}});
+u.button.addEventListener('click',async()=>{
+  if(uploading||!firmware)return;
+  uploading=true;const selectedFirmware=firmware;
+  const states=new Map([...document.querySelectorAll('button,input')].map(el=>[el,el.disabled]));
+  states.forEach((_,el)=>el.disabled=true);stopRecognition();u.progress.value=0;u.log.textContent='';
+  let boot,port,success=false;
+  try{
+    // Prompt immediately during the click gesture; a connected port can be reused.
+    port=serialPort||await navigator.serial.requestPort();
+    await disconnectSerial();if(writer||serialPort)throw Error('제어 포트를 닫지 못했습니다. 연결을 해제한 후 다시 시도하세요.');
+    boot=new Bootloader(port);uploadMessage('Uno R3 연결 및 부트로더 확인 중…');await boot.open();
+    await boot.flash(selectedFirmware.image,value=>{u.progress.value=value;u.status.textContent=`업로드 및 읽기 검증 ${value}%`;});
+    success=true;uploadMessage('업로드 및 전체 읽기 검증 완료. 제어용 USB 연결을 준비합니다.');
+  }catch(err){uploadMessage(err.name==='NotFoundError'?'포트 선택이 취소되었습니다.':'업로드 실패: '+err.message);}
+  finally{
+    try{if(boot)await boot.close();}catch(err){success=false;uploadMessage('포트 정리 오류: '+err.message);}
+    if(success){try{await pause(500);await port.open({baudRate:9600});serialPort=port;writer=port.writable.getWriter();await pause(2000);lastSent='';e.serialStatus.textContent='Arduino 연결됨 · 9600 baud';uploadMessage('완료 · 표정 버튼을 누르거나 카메라 인식을 시작하세요.');}catch(err){uploadMessage('업로드 완료 · USB 연결 버튼으로 다시 연결하세요.');}}
+    states.forEach((disabled,el)=>el.disabled=disabled);uploading=false;
+    e.connectBtn.disabled=!!writer;e.disconnectBtn.disabled=!writer;updateRecognitionState();e.stopBtn.disabled=true;
+    u.button.disabled=!firmware||!('serial' in navigator)||!isSecureContext;
+  }
+});
+if(!('serial' in navigator)||!isSecureContext){u.status.textContent='업로드는 PC의 Chrome/Edge에서 HTTPS로 접속해야 합니다. 이 브라우저에서는 지원하지 않습니다.';}
+loadFirmware();
+
+</script></body></html>
